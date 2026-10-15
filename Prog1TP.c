@@ -190,3 +190,119 @@ int leerSiNo(char mensaje[])
 
     return respuesta == 'S';
 }
+
+void pedirTorneo(torneo *t)
+{
+    printf("\n--- Nuevo torneo ---\n");
+    leerCadena("Nombre: ", t->nombre, MAX_NOMBRE);
+    leerCadena("Deporte: ", t->deporte, MAX_DEPORTE);
+    t->cantidadEquipos = leerNumero("Cantidad de equipos: ", MIN_EQUIPOS, MAX_EQUIPOS);
+    t->premio = leerNumeroReal("Premio: ", 0, PREMIO_MAX);
+    t->terminado = leerSiNo("Ya finalizo? (S/N): ");
+}
+
+void mostrarTorneo(torneo t)
+{
+    printf("%-20s %-15s %5d %12.2f  %s\n", t.nombre, t.deporte,
+           t.cantidadEquipos, t.premio,
+           t.terminado == 1 ? "Finalizado" : "En curso");
+}
+
+int leerTorneo(FILE *archivo, torneo *t)
+{
+    return fscanf(archivo, "%s %s %d %lf %d", t->nombre, t->deporte,
+                  &t->cantidadEquipos, &t->premio, &t->terminado) == 5;
+}
+
+void escribirTorneo(FILE *archivo, torneo t)
+{
+    fprintf(archivo, "%s %s %d %.2f %d\n", t.nombre, t.deporte,
+            t.cantidadEquipos, t.premio, t.terminado);
+}
+
+void agregarTorneo(void)
+{
+    torneo t;
+    FILE *archivo;
+
+    pedirTorneo(&t);
+
+    archivo = fopen(ARCHIVO, "a");
+    if (archivo == NULL) {
+        printf("No se pudo abrir el archivo.\n");
+        return;
+    }
+
+    escribirTorneo(archivo, t);
+    fclose(archivo);
+    printf("Torneo agregado con exito.\n");
+}
+
+void listarTorneos(int filtrar, double premioMinimo)
+{
+    torneo t;
+    int total = 0;
+    FILE *archivo = fopen(ARCHIVO, "r");
+
+    if (archivo == NULL) {
+        printf("Todavia no hay torneos guardados.\n");
+        return;
+    }
+
+    printf("\n%-20s %-15s %5s %12s  %s\n",
+           "NOMBRE", "DEPORTE", "EQUIPOS", "PREMIO", "ESTADO");
+
+    while (leerTorneo(archivo, &t)) {
+        if (!filtrar || t.premio >= premioMinimo) {
+            mostrarTorneo(t);
+            total++;
+        }
+    }
+
+    fclose(archivo);
+
+    if (total == 0) {
+        printf("No se encontro ningun torneo.\n");
+    } else {
+        printf("\nTotal: %d torneo(s)\n", total);
+    }
+}
+
+void dividirArchivos(void)
+{
+    torneo t;
+    int contFin = 0, contCurso = 0;
+    FILE *origen = fopen(ARCHIVO, "r");
+    FILE *fin, *curso;
+
+    if (origen == NULL) {
+        printf("Todavia no hay torneos guardados.\n");
+        return;
+    }
+
+    fin = fopen(ARCHIVO_FINALIZADOS, "w");
+    curso = fopen(ARCHIVO_EN_CURSO, "w");
+
+    if (fin == NULL || curso == NULL) {
+        printf("No se pudieron crear los archivos de destino.\n");
+        fclose(origen);
+        return;
+    }
+
+    while (leerTorneo(origen, &t)) {
+        if (t.terminado == 1) {
+            escribirTorneo(fin, t);
+            contFin++;
+        } else {
+            escribirTorneo(curso, t);
+            contCurso++;
+        }
+    }
+
+    fclose(origen);
+    fclose(fin);
+    fclose(curso);
+
+    printf("\n%d torneo(s) finalizado(s) -> %s\n", contFin, ARCHIVO_FINALIZADOS);
+    printf("%d torneo(s) en curso -> %s\n", contCurso, ARCHIVO_EN_CURSO);
+}
