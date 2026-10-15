@@ -78,3 +78,115 @@ int menu(void)
     printf("5. Salir\n");
     return leerNumero("Opcion: ", 1, 5);
 }
+
+// Lee una linea completa consumiendo el buffer correctamente
+void leerLinea(char *destino, int tamanio)
+{
+    int largo;
+    int caracter;
+
+    if (fgets(destino, tamanio, stdin) == NULL) {
+        printf("\nSe cerro la entrada de datos. Fin del programa.\n");
+        exit(1);
+    }
+
+    largo = (int) strlen(destino);
+    if (largo > 0 && destino[largo - 1] == '\n') {
+        destino[largo - 1] = '\0';
+    } else {
+        do {
+            caracter = getchar();
+        } while (caracter != '\n' && caracter != EOF);
+    }
+}
+
+// Lee una cadena sin sobrepasar el tamano maximo permitido
+void leerCadena(char mensaje[], char destino[], int maximo)
+{
+    char linea[TAM_LINEA];
+    int ok;
+
+    do {
+        printf("%s", mensaje);
+        leerLinea(linea, TAM_LINEA);
+        
+        if ((int)strlen(linea) > maximo || strlen(linea) == 0) {
+            printf("Error: Ingrese un texto valido (maximo %d caracteres).\n", maximo);
+            ok = 0;
+        } else {
+            ok = 1;
+        }
+    } while (!ok);
+
+    strcpy(destino, linea);
+}
+
+// Lee un entero validando rango e ingresando mediante buffer
+int leerNumero(char mensaje[], int minimo, int maximo)
+{
+    char linea[TAM_LINEA];
+    char sobrante;
+    int valor = 0;
+    int ok;
+
+    do {
+        printf("%s", mensaje);
+        leerLinea(linea, TAM_LINEA);
+        
+        ok = sscanf(linea, "%d %c", &valor, &sobrante) == 1 
+             && valor >= minimo && valor <= maximo;
+
+        if (!ok) {
+            printf("Valor invalido. Intente de nuevo.\n");
+        }
+    } while (!ok);
+
+    return valor;
+}
+
+// Lee un double validando rango e ingresando mediante buffer
+double leerNumeroReal(char mensaje[], double minimo, double maximo)
+{
+    char linea[TAM_LINEA];
+    char sobrante;
+    double valor = 0;
+    int ok;
+
+    do {
+        printf("%s", mensaje);
+        leerLinea(linea, TAM_LINEA);
+
+        ok = sscanf(linea, "%lf %c", &valor, &sobrante) == 1 
+             && valor >= minimo && valor <= maximo;
+
+        if (!ok) {
+            printf("Valor invalido. Intente de nuevo.\n");
+        }
+    } while (!ok);
+
+    return valor;
+}
+
+// Lee la respuesta S/N procesando caracteres
+int leerSiNo(char mensaje[])
+{
+    char linea[TAM_LINEA];
+    char respuesta = ' ';
+    char sobrante;
+    int ok;
+
+    do {
+        printf("%s", mensaje);
+        leerLinea(linea, TAM_LINEA);
+
+        ok = sscanf(linea, " %c %c", &respuesta, &sobrante) == 1;
+        respuesta = (char) toupper((unsigned char) respuesta);
+
+        if (!ok || (respuesta != 'S' && respuesta != 'N')) {
+            printf("Respuesta invalida. Ingrese S o N.\n");
+            ok = 0;
+        }
+    } while (!ok);
+
+    return respuesta == 'S';
+}
