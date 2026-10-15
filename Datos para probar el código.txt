@@ -1,0 +1,12 @@
+Datos para probar el código.
+
+Copa_Libertadores Futbol 32 23000000.00 0
+Liga_Nacional Basquet 20 150000.50 1
+Torneo_Apertura Futbol 28 500000.00 1
+Abierto_de_Buenos_Aires Tenis 32 675000.00 1
+Super_4_Regional Voley 4 12000.00 0
+Copa_Argentina Futbol 64 2500000.00 0
+Torneo_Metropolitano Hockey 14 0.00 1
+Circuito_Nacional Rugby 12 85000.75 0
+Liga_Universitaria Handball 10 3500.00 1
+Mundial_de_Clubes Futbol 32 100000000.00 0
